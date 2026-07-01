@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mObywatel</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter', sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:
+        radial-gradient(circle at 20% 20%, #1d2b3a 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, #3a1d2b 0%, transparent 40%),
+        #0b0f14;
+    color:#fff;
+    overflow:hidden;
+}
+
+/* glow blobs */
+body::before{
+    content:"";
+    position:absolute;
+    width:500px;
+    height:500px;
+    background:rgba(211,47,47,.25);
+    filter:blur(120px);
+    top:-100px;
+    left:-100px;
+    z-index:0;
+}
+
+body::after{
+    content:"";
+    position:absolute;
+    width:500px;
+    height:500px;
+    background:rgba(70,130,255,.15);
+    filter:blur(120px);
+    bottom:-120px;
+    right:-120px;
+    z-index:0;
+}
+
+.container{
+    position:relative;
+    z-index:1;
+    width:92%;
+    max-width:420px;
+    padding:42px;
+    border-radius:24px;
+
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(18px);
+
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+    text-align:center;
+
+    animation:fadeIn .6s ease;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+.logo{
+    width:110px;
+    margin-bottom:18px;
+    filter: drop-shadow(0 0 20px rgba(211,47,47,.4));
+}
+
+h1{
+    font-size:22px;
+    font-weight:600;
+    margin-bottom:6px;
+}
+
+p{
+    color:rgba(255,255,255,.65);
+    font-size:14px;
+    margin-bottom:22px;
+}
+
+button{
+    width:100%;
+    padding:14px 18px;
+    border:none;
+    border-radius:14px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+
+    background:linear-gradient(135deg,#d32f2f,#ff5252);
+    color:white;
+
+    box-shadow:0 10px 25px rgba(211,47,47,.25);
+    transition:.25s ease;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 15px 30px rgba(211,47,47,.35);
+}
+
+button:active{
+    transform:scale(.98);
+}
+
+/* dropdown premium */
+details{
+    margin-top:16px;
+    text-align:left;
+    border-radius:14px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+    overflow:hidden;
+}
+
+summary{
+    padding:12px 14px;
+    cursor:pointer;
+    font-weight:500;
+    list-style:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+summary::after{
+    content:"⌄";
+    transition:.2s;
+    opacity:.7;
+}
+
+details[open] summary::after{
+    transform:rotate(180deg);
+}
+
+details p{
+    padding:10px 14px;
+    margin:0;
+    font-size:13px;
+    color:rgba(255,255,255,.7);
+    border-top:1px solid rgba(255,255,255,.06);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <img src="assets/icons/coi_common_ui_ic_mobywatel_logo.svg" class="logo">
+
+    <h1>mObywatel</h1>
+    <p>Zainstaluj aplikację, aby kontynuować</p>
+
+    <button id="installBtn" hidden>
+        Zainstaluj aplikację
+    </button>
+
+    <details>
+        <summary>Instrukcja instalacji</summary>
+        <p><b>IOS:</b> 1. Otworz strone w Safari.
+2. Wcisnij przycisk Udostepnij.
+3. Wybierz "Dodaj do ekranu poczatkowego"
+4. Potwierdz dodanie..</p>
+        <p><b>Android:</b> 
+1. Otworz strone w Chrome.
+2. Otworz menu (trzy kropki).
+3. Wybierz "Dodaj do ekranu glownego".
+4. Potwierdz instalacje.”.</p>
+    </details>
+
+</div>
+
+<script>
+const installBtn = document.getElementById("installBtn");
+let deferredPrompt = null;
+
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js");
+}
+
+if (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone
+) {
+    location.replace("login.html");
+}
+
+window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.hidden = false;
+});
+
+installBtn.addEventListener("click", async () => {
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+
+    if (result.outcome === "accepted") {
+        setTimeout(() => location.replace("login.html"), 800);
+    }
+});
+
+window.addEventListener("appinstalled", () => {
+    setTimeout(() => location.replace("login.html"), 800);
+});
+</script>
+
+</body>
+</html>
